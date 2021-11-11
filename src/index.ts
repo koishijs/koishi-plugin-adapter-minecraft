@@ -8,4 +8,4 @@ declare module 'koishi' {
   }
 }
 
-export = Adapter.define('minecraft', MinecraftBot, WebSocketClient)
+export default Adapter.define('minecraft', MinecraftBot, WebSocketClient)
