@@ -6,7 +6,7 @@ const noop = async () => null
 
 export interface BotConfig extends Bot.BaseConfig, mineflayer.BotOptions {}
 
-export const BotConfig: Schema<BotConfig> = Schema.object({
+export const BotConfig = Schema.object({
   username: Schema.string(),
 })
 
