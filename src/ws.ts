@@ -53,6 +53,8 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
     const channelName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'chat'
     const guildName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'server'
 
+    this.ctx.bail('minecraft/before-listen', bot)
+
     bot.flayer.on('chat', (author, content, translate, jsonMsg, matches) => {
       if (author === bot.flayer.username) return
       this.dispatch(new Session(bot, {

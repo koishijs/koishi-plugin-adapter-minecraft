@@ -6,6 +6,9 @@ declare module 'koishi' {
   interface Modules {
     'adapter-minecraft': typeof import('.')
   }
+  interface EventMap {
+    'minecraft/before-listen'(bot: MinecraftBot): void
+  }
 }
 
 export default Adapter.define('minecraft', MinecraftBot, WebSocketClient)
