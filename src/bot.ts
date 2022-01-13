@@ -1,4 +1,4 @@
-import { Bot, Random, Schema, segment } from 'koishi'
+import { Bot, Random, Schema, segment, Logger, sleep } from 'koishi'
 import * as mineflayer from 'mineflayer'
 import { AdapterConfig } from './utils'
 
@@ -7,7 +7,11 @@ const noop = async () => null
 export interface BotConfig extends Bot.BaseConfig, mineflayer.BotOptions {}
 
 export const BotConfig = Schema.object({
+  host: Schema.string(),
   username: Schema.string(),
+  password: Schema.string(),
+  auth: Schema.string(),
+  version: Schema.string(),
 })
 
 export class MinecraftBot extends Bot<BotConfig> {
@@ -17,11 +21,22 @@ export class MinecraftBot extends Bot<BotConfig> {
 
   async sendMessage(channelId: string, content: string, guildId?: string) {
     const session = this.createSession({ channelId, content, guildId, subtype: guildId ? 'group' : 'private' })
+    new Logger('mc').warn('Sending message: ' + content)
+    
     if (await this.app.serial(session, 'before-send', session)) return
-    const image = { type: 'text', data: { content: '[Image]' } }
-    content = segment.join(segment.parse(content).map(i => i.type === 'image' ? image : i))
+    content = segment.join(segment.parse(content).map(i => i.type !== 'text' 
+      ? { type: 'text', data: { content: `[${i.type}]` } } 
+      : i
+    ))
     if (content.length > 512) content = content.substr(0, 512) + '...'
-    if (channelId === '_public') this.flayer.chat(content)
+    if (channelId === '_public') {
+      const lines = content.trim().split("\n");
+      const numLineAtATime = 2;
+      for (let i = 0; i < lines.length; i += numLineAtATime) {
+        await this.flayer.chat(lines.slice(i, i + numLineAtATime).join('\n'))
+        await sleep(800)
+      }
+    }
     else this.flayer.whisper(channelId, content)
 
     this.app.emit(session, 'send', session)
