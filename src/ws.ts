@@ -1,4 +1,4 @@
-import { Adapter, Session, Logger, sleep } from 'koishi'
+import { Adapter, Session } from 'koishi'
 import { createBot } from 'mineflayer'
 import { BotConfig, MinecraftBot } from './bot'
 import { AdapterConfig } from './utils'
@@ -9,42 +9,35 @@ declare module 'koishi' {
   }
 }
 
+export const CHANNEL_ID: string = '_public'
+export const SERVER_UID: string = '_'
+
 export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, AdapterConfig> {
   static schema = BotConfig
 
   async prepare(bot: MinecraftBot) {
-    const config = {
-      skipValidation: true,
-      host: '1.1.1.1', // minecraft server ip
-      username: 'bot', // minecraft username
-      password: '12345678', // minecraft password, comment out if you want to log into online-mode=false servers
-      port: 25565, // only set if you need a port that isn't 25565
-      ...bot.config,
-    }
+    const config = bot.config
     const url = 'minecraft://' + config.host + ':' + config.port + '/' + config.username
-    new Logger('mc').info("Connect to MC server: " + url)
-    bot.flayer = createBot(config);
+    bot.logger.info('Connect to MC server: ' + url)
+    bot.flayer = createBot(config)
+    bot.flayer.once('spawn', () => {
+      bot.selfId = bot.username = bot.nickname = bot.flayer.player.username
+    })
     return {
       url,
       on(name, event) {
-        if (name === 'open') bot.flayer.on('login', () => {
-          new Logger('mc').success("Mc logged in: " + config.username)
+        if (name === 'open') bot.flayer.once('spawn', () => {
           return event()
         })
         if (name === 'error') bot.flayer.on('error', (err) => {
-          new Logger('mc').warn('error: ' + err)
-          return event('' + err)
+          return event(err)
         })
         if (name === 'close') bot.flayer.on('end', (reason) => {
-          new Logger('mc').warn('close: ' + reason);
-          new Logger('mc').warn('Will retry in 60s');
-          delete bot.flayer;
-
-          sleep(60000).then(() => {
-            new Logger('mc').info("Connect to MC server: " + url)
-            bot.flayer = createBot(config);
-          });
+          return event('flayer ended', 'flayer ended: ' + reason)
         })
+      },
+      close() {
+        bot.flayer.end()
       },
     } as any
   }
@@ -59,16 +52,15 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
 
     bot.flayer.on('chat', (author, content, translate, jsonMsg, matches) => {
       if (author === bot.flayer.username) return
-      // bot.selfId = bot.flayer.username
-      new Logger('mc').warn('Rev message: ' + author + content)
-      new Logger('mc').warn('bot.flayer.username: ' + bot.selfId)
+      console.warn(author)
+      console.warn(bot.flayer.username)
       this.dispatch(new Session(bot, {
         ...common,
         subtype: 'group',
         content,
-        author: { userId: author },
-        channelId: '_public',
-        guildId: '_public',
+        author: { userId: author, username: author },
+        channelId: CHANNEL_ID,
+        guildId: CHANNEL_ID,
       }))
     })
 
@@ -76,10 +68,24 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
       this.dispatch(new Session(bot, {
         ...common,
         content,
-        author: { userId: author },
+        author: { userId: author, username: author },
         channelId: author,
       }))
     })
+
+    const serverUser = bot.config.receiveMessage
+    if (serverUser) {
+      bot.flayer.on('messagestr', (message, position, jsonMsg) => {
+        if (position === 'chat') return
+        this.dispatch(new Session(bot, {
+          ...common,
+          subtype: 'group',
+          content: message,
+          author: serverUser,
+          channelId: CHANNEL_ID,
+        }))
+      })
+    }
 
     setInterval(() => {
       // Keep alive
