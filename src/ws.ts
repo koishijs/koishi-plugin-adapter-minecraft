@@ -3,12 +3,6 @@ import { createBot } from 'mineflayer'
 import { BotConfig, MinecraftBot } from './bot'
 import { AdapterConfig } from './utils'
 
-declare module 'koishi' {
-  interface Modules {
-    'adapter-minecraft': typeof import('.')
-  }
-}
-
 export const CHANNEL_ID: string = '_public'
 
 export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, AdapterConfig> {
@@ -54,6 +48,11 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
     const guildName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'server'
 
     await this.ctx.serial('minecraft/before-listen', bot)
+
+    this.dispatch = (session: Session) => {
+      const processed = this.ctx.chain('minecraft/before-message', session)
+      if (processed) return super.dispatch(processed)
+    }
 
     bot.flayer.on('chat', (author, content, translate, jsonMsg, matches) => {
       if (author === bot.flayer.username) return
