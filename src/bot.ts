@@ -43,9 +43,10 @@ export class MinecraftBot extends Bot<BotConfig> {
     const session = this.createSession({ channelId, content, guildId, subtype: guildId ? 'group' : 'private' })
     if (await this.app.serial(session, 'before-send', session)) return
     content = segment.join(segment.parse(content).map(i => i.type !== 'text'
-      ? { type: 'text', data: { content: `[${i.type}]` } }
+      ? { type: 'text', data: { content: ` [${i.type}] ` } }
       : i,
     ))
+    content = segment.unescape(content)
     if (content.length > 512) content = content.substring(0, 512) + '...'
     if (channelId === '_public') {
       if (this.config.rateLimit) {

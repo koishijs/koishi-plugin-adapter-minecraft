@@ -10,7 +10,6 @@ declare module 'koishi' {
 }
 
 export const CHANNEL_ID: string = '_public'
-export const SERVER_UID: string = '_'
 
 export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, AdapterConfig> {
   static schema = BotConfig
@@ -50,17 +49,21 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
       selfId: bot.flayer.username,
     }
 
+    const channelId = CHANNEL_ID
+    const channelName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'chat'
+    const guildName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'server'
+
     bot.flayer.on('chat', (author, content, translate, jsonMsg, matches) => {
       if (author === bot.flayer.username) return
-      console.warn(author)
-      console.warn(bot.flayer.username)
       this.dispatch(new Session(bot, {
         ...common,
         subtype: 'group',
         content,
         author: { userId: author, username: author },
-        channelId: CHANNEL_ID,
-        guildId: CHANNEL_ID,
+        channelId,
+        channelName,
+        guildId: channelId,
+        guildName,
       }))
     })
 
@@ -82,7 +85,10 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
           subtype: 'group',
           content: message,
           author: serverUser,
-          channelId: CHANNEL_ID,
+          channelId,
+          channelName,
+          guildId: channelId,
+          guildName,
         }))
       })
     }
