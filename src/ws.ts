@@ -35,6 +35,11 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
     } as any
   }
 
+  async dispatchMCMsg(session: Session) {
+    if (await this.ctx.serial('minecraft/before-dispatch', session)) return
+    return this.dispatch(session)
+  }
+
   async accept(bot: MinecraftBot) {
     bot.resolve()
 
@@ -44,19 +49,14 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
     }
 
     const channelId = CHANNEL_ID
-    const channelName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'chat'
-    const guildName = bot.config.receiveMessage ? bot.config.receiveMessage.username : 'server'
+    const channelName = bot.config.author ? bot.config.author.username : 'chat'
+    const guildName = bot.config.author ? bot.config.author.username : 'server'
 
     await this.ctx.serial('minecraft/before-listen', bot)
 
-    this.dispatch = (session: Session) => {
-      const processed = this.ctx.chain('minecraft/before-message', session)
-      if (processed) return super.dispatch(processed)
-    }
-
     bot.flayer.on('chat', (author, content, translate, jsonMsg, matches) => {
       if (author === bot.flayer.username) return
-      this.dispatch(new Session(bot, {
+      this.dispatchMCMsg(new Session(bot, {
         ...common,
         subtype: 'group',
         content,
@@ -69,7 +69,7 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
     })
 
     bot.flayer.on('whisper', (author, content, translate, jsonMsg, matches) => {
-      this.dispatch(new Session(bot, {
+      this.dispatchMCMsg(new Session(bot, {
         ...common,
         content,
         author: { userId: author, username: author },
@@ -77,11 +77,11 @@ export default class WebSocketClient extends Adapter.WebSocketClient<BotConfig, 
       }))
     })
 
-    const serverUser = bot.config.receiveMessage
+    const serverUser = bot.config.author
     if (serverUser) {
       bot.flayer.on('messagestr', (message, position, jsonMsg) => {
         if (position === 'chat') return
-        this.dispatch(new Session(bot, {
+        this.dispatchMCMsg(new Session(bot, {
           ...common,
           subtype: 'group',
           content: message,

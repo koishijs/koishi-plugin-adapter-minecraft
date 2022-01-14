@@ -1,4 +1,4 @@
-import { Adapter, Session } from 'koishi'
+import { Adapter, Awaitable } from 'koishi'
 import { MinecraftBot } from './bot'
 import WebSocketClient from './ws'
 
@@ -9,7 +9,7 @@ declare module 'koishi' {
 
   interface EventMap {
     'minecraft/before-listen'(bot: MinecraftBot): void
-    'minecraft/before-message'(session?: Session): Session | undefined
+    'minecraft/before-dispatch'(session?: Session): Awaitable<void | boolean>
   }
 }
 

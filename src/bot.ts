@@ -5,7 +5,7 @@ import { AdapterConfig } from './utils'
 const noop = async () => null
 export interface BotConfig extends Bot.BaseConfig, mineflayer.BotOptions {
   rateLimit: number
-  receiveMessage: false | Bot.Author
+  author: false | Bot.Author
 }
 export const BotConfig: Schema<Partial<mineflayer.BotOptions>> = Schema.intersect([
   Schema.object({
