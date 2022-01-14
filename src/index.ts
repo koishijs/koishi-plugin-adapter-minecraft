@@ -6,6 +6,7 @@ declare module 'koishi' {
   interface Modules {
     'adapter-minecraft': typeof import('.')
   }
+
   interface EventMap {
     'minecraft/before-listen'(bot: MinecraftBot): void
     'minecraft/before-message'(session?: Session): Session | undefined

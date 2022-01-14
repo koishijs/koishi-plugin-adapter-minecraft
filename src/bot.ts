@@ -12,8 +12,8 @@ export const BotConfig: Schema<Partial<mineflayer.BotOptions>> = Schema.intersec
     username: Schema.string().required().description('minecraft username'),
     port: Schema.number().default(25565).description('minecraft server port, default to 25565'),
     auth: Schema.union([
-      Schema.const('mojang' as 'mojang'),
-      Schema.const('microsoft' as 'microsoft'),
+      Schema.const('mojang' as const),
+      Schema.const('microsoft' as const),
     ]).default('mojang'),
     password: Schema.string().description('minecraft password, comment out if you want to log into online-mode=false servers'),
     host: Schema.string().default('localhost').description('minecraft server ip/domain'),
@@ -22,7 +22,7 @@ export const BotConfig: Schema<Partial<mineflayer.BotOptions>> = Schema.intersec
   }).description('mineflayer common options'),
   Schema.object({
     rateLimit: Schema.number().default(0).description('Min interval between 2 message sent. Use milliseconds.'),
-    receiveMessage: Schema.union([
+    author: Schema.union([
       Schema.const(false),
       Schema.object({
         userId: Schema.string().default('_'),
