@@ -1,4 +1,4 @@
-import { Bot, Random, Schema, segment, sleep } from 'koishi'
+import { Bot, Schema, segment, sleep } from 'koishi'
 import * as mineflayer from 'mineflayer'
 import { AdapterConfig } from './utils'
 
@@ -40,7 +40,7 @@ export class MinecraftBot extends Bot<BotConfig> {
   static schema = AdapterConfig
 
   async sendMessage(channelId: string, content: string, guildId?: string) {
-    const session = this.createSession({ channelId, content, guildId, subtype: guildId ? 'group' : 'private' })
+    const session = await this.session({ channelId, content, guildId, subtype: guildId ? 'group' : 'private' })
     if (await this.app.serial(session, 'before-send', session)) return
     content = segment.join(segment.parse(content).map(i => i.type !== 'text'
       ? { type: 'text', data: { content: ` [${i.type}] ` } }
@@ -61,7 +61,7 @@ export class MinecraftBot extends Bot<BotConfig> {
     else this.flayer.whisper(channelId, content)
 
     this.app.emit(session, 'send', session)
-    return Random.id()
+    return []
   }
 
   async sendPrivateMessage(channelId: string, content: string) {

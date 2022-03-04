@@ -2,11 +2,10 @@ import { Adapter, Awaitable } from 'koishi'
 import { MinecraftBot } from './bot'
 import WebSocketClient from './ws'
 
-declare module 'koishi' {
-  interface Modules {
-    'adapter-minecraft': typeof import('.')
-  }
+export * from './ws'
+export * from './bot'
 
+declare module 'koishi' {
   interface EventMap {
     'minecraft/before-listen'(bot: MinecraftBot): void
     'minecraft/before-dispatch'(session?: Session): Awaitable<void | boolean>
