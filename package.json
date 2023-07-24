@@ -15,12 +15,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/koishijs/koishi.git"
+    "url": "git+https://github.com/koishijs/koishi-plugin-adapter-minecraft.git"
   },
   "bugs": {
-    "url": "https://github.com/koishijs/koishi/issues"
+    "url": "https://github.com/koishijs/koishi-plugin-adapter-minecraft/issues"
   },
-  "homepage": "https://koishi.js.org/api/adapter/minecraft.html",
+  "homepage": "https://github.com/koishijs/koishi-plugin-adapter-minecraft",
   "keywords": [
     "bot",
     "minecraft",
@@ -30,9 +30,9 @@
     "impl:adapter"
   ],
   "peerDependencies": {
-    "koishi": "^4.4.0"
+    "koishi": "^4.13.0"
   },
   "dependencies": {
-    "mineflayer": "^3.14.1"
+    "mineflayer": "^3.18.0"
   }
 }
