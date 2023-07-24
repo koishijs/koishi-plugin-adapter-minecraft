@@ -1,4 +1,4 @@
-import { Bot, Schema, segment, sleep, Universal, Context, h, Adapter } from 'koishi'
+import { Bot, Schema, sleep, Universal, Context, h, Adapter } from 'koishi'
 import * as mineflayer from 'mineflayer'
 import { WsClient } from './ws'
 
@@ -16,7 +16,7 @@ export class MinecraftBot extends Bot<MinecraftBot.Config> {
       ? h.text(` [${i.type}] `)
       : i,
     ).join()
-    content = segment.unescape(content)
+    content = h.unescape(content)
     if (content.length > 512) content = content.substring(0, 512) + '...'
     if (channelId === '_public') {
       if (this.config.rateLimit) {
