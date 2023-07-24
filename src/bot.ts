@@ -2,6 +2,8 @@ import { Bot, Schema, sleep, Universal, Context, h, Adapter } from 'koishi'
 import * as mineflayer from 'mineflayer'
 import { WsClient } from './ws'
 
+const noop = async () => null
+
 export class MinecraftBot extends Bot<MinecraftBot.Config> {
   flayer: mineflayer.Bot
   constructor(ctx: Context, config: MinecraftBot.Config) {
@@ -49,6 +51,18 @@ export class MinecraftBot extends Bot<MinecraftBot.Config> {
   async getChannelList() {
     return []
   }
+
+  handleFriendRequest = noop
+  handleGuildMemberRequest = noop
+  handleGuildRequest = noop
+  editMessage = noop
+  deleteMessage = noop
+  deleteFriend = noop
+  getMessage = noop
+  getUser = noop
+  getChannel = noop
+  getGuildMember = noop
+  getGuild = noop
 }
 
 export namespace MinecraftBot {
